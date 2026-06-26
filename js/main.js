@@ -1,379 +1,165 @@
-// Soul Sync Website - Main JavaScript
-// Supports: Arabic (ar) & English (en)
+// ===== Soul Sync — Main JS =====
 
-document.addEventListener('DOMContentLoaded', () => {
-  // ===== Language Switcher =====
-  const langSwitch = document.getElementById('langSwitch');
-  const langButtons = document.querySelectorAll('.lang-btn');
-  let currentLang = 'en'; // Default: English
+(function() {
+  'use strict';
 
-  // Load saved language preference
-  const savedLang = localStorage.getItem('soulsync-lang');
-  if (savedLang) {
-    currentLang = savedLang;
-  }
+    // ===== Language Switcher =====
+      const langSwitch = document.getElementById('langSwitch');
+        const html = document.documentElement;
+          let currentLang = localStorage.getItem('soulsync-lang') || 'en';
 
-  function applyLanguage(lang) {
-    currentLang = lang;
-    const html = document.documentElement;
+            function setLang(lang) {
+                currentLang = lang;
+                    html.setAttribute('lang', lang);
+                        html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+                            localStorage.setItem('soulsync-lang', lang);
 
-    // Update direction
-    if (lang === 'ar') {
-      html.setAttribute('dir', 'rtl');
-      html.setAttribute('lang', 'ar');
-    } else {
-      html.setAttribute('dir', 'ltr');
-      html.setAttribute('lang', 'en');
-    }
+                                // Update all elements with data-ar/data-en
+                                    document.querySelectorAll('[data-ar][data-en]').forEach(el => {
+                                          if (el.tagName === 'META' && el.getAttribute('name') === 'description') {
+                                                  el.setAttribute('content', el.getAttribute('data-' + lang));
+                                                        } else if (el.tagName === 'TITLE') {
+                                                                el.textContent = el.getAttribute('data-' + lang);
+                                                                      } else {
+                                                                              el.textContent = el.getAttribute('data-' + lang);
+                                                                                    }
+                                                                                        });
 
-    // Update all elements with data-ar and data-en
-    document.querySelectorAll('[data-ar][data-en]').forEach(el => {
-      // For input elements
-      if (el.hasAttribute('placeholder')) {
-        el.setAttribute('placeholder', el.getAttribute('data-' + lang));
-      }
-      // For elements with text content
-      else {
-        el.textContent = el.getAttribute('data-' + lang);
-      }
-    });
+                                                                                            // Update active button
+                                                                                                if (langSwitch) {
+                                                                                                      langSwitch.querySelectorAll('.lang-btn').forEach(btn => {
+                                                                                                              btn.classList.toggle('active', btn.dataset.lang === lang);
+                                                                                                                    });
+                                                                                                                        }
+                                                                                                                          }
 
-    // Update title
-    const titleEl = document.querySelector('title[data-ar][data-en]');
-    if (titleEl) {
-      document.title = titleEl.getAttribute('data-' + lang);
-    }
+                                                                                                                            if (langSwitch) {
+                                                                                                                                langSwitch.querySelectorAll('.lang-btn').forEach(btn => {
+                                                                                                                                      btn.addEventListener('click', () => setLang(btn.dataset.lang));
+                                                                                                                                          });
+                                                                                                                                            }
 
-    // Update meta description
-    const metaDesc = document.querySelector('meta[name="description"][data-ar][data-en]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', metaDesc.getAttribute('data-' + lang));
-    }
+                                                                                                                                              // Init language
+                                                                                                                                                setLang(currentLang);
 
-    // Update active button
-    langButtons.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.lang === lang);
-    });
+                                                                                                                                                  // ===== Navbar Scroll Effect =====
+                                                                                                                                                    const navbar = document.getElementById('navbar');
+                                                                                                                                                      if (navbar) {
+                                                                                                                                                          window.addEventListener('scroll', () => {
+                                                                                                                                                                navbar.classList.toggle('scrolled', window.scrollY > 50);
+                                                                                                                                                                    });
+                                                                                                                                                                      }
 
-    // Save preference
-    localStorage.setItem('soulsync-lang', lang);
+                                                                                                                                                                        // ===== Mobile Menu Toggle =====
+                                                                                                                                                                          const mobileToggle = document.getElementById('mobileToggle');
+                                                                                                                                                                            const navLinks = document.getElementById('navLinks');
+                                                                                                                                                                              if (mobileToggle && navLinks) {
+                                                                                                                                                                                  mobileToggle.addEventListener('click', () => {
+                                                                                                                                                                                        mobileToggle.classList.toggle('active');
+                                                                                                                                                                                              navLinks.classList.toggle('active');
+                                                                                                                                                                                                  });
 
-    // Refresh observer for animations (direction change may affect layout)
-    setupScrollAnimations();
-  }
+                                                                                                                                                                                                      // Close on link click
+                                                                                                                                                                                                          navLinks.querySelectorAll('a').forEach(link => {
+                                                                                                                                                                                                                link.addEventListener('click', () => {
+                                                                                                                                                                                                                        mobileToggle.classList.remove('active');
+                                                                                                                                                                                                                                navLinks.classList.remove('active');
+                                                                                                                                                                                                                                      });
+                                                                                                                                                                                                                                          });
+                                                                                                                                                                                                                                            }
 
-  // Language button clicks
-  langButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      applyLanguage(btn.dataset.lang);
-    });
-  });
+                                                                                                                                                                                                                                              // ===== Feature Tabs =====
+                                                                                                                                                                                                                                                const featureTabs = document.querySelectorAll('.feature-tab');
+                                                                                                                                                                                                                                                  const featureContents = document.querySelectorAll('.feature-content');
 
-  // ===== Navbar scroll effect =====
-  const navbar = document.getElementById('navbar');
+                                                                                                                                                                                                                                                    featureTabs.forEach(tab => {
+                                                                                                                                                                                                                                                        tab.addEventListener('click', () => {
+                                                                                                                                                                                                                                                              featureTabs.forEach(t => t.classList.remove('active'));
+                                                                                                                                                                                                                                                                    featureContents.forEach(c => c.classList.remove('active'));
+                                                                                                                                                                                                                                                                          tab.classList.add('active');
+                                                                                                                                                                                                                                                                                const target = document.getElementById(tab.dataset.tab);
+                                                                                                                                                                                                                                                                                      if (target) target.classList.add('active');
+                                                                                                                                                                                                                                                                                          });
+                                                                                                                                                                                                                                                                                            });
 
-  if (navbar) {
-    let lastScroll = 0;
-    window.addEventListener('scroll', () => {
-      const currentScroll = window.pageYOffset;
-      if (currentScroll > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
-      // Hide navbar on scroll down, show on scroll up (mobile optimization)
-      if (window.innerWidth <= 768) {
-        if (currentScroll > lastScroll && currentScroll > 100) {
-          navbar.style.transform = 'translateY(-100%)';
-        } else {
-          navbar.style.transform = 'translateY(0)';
-        }
-      }
-      lastScroll = currentScroll;
-    }, { passive: true });
-    if (window.pageYOffset > 50) {
-      navbar.classList.add('scrolled');
-    }
-  }
+                                                                                                                                                                                                                                                                                              // ===== Scroll Animations =====
+                                                                                                                                                                                                                                                                                                const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+                                                                                                                                                                                                                                                                                                  const observer = new IntersectionObserver((entries) => {
+                                                                                                                                                                                                                                                                                                      entries.forEach(entry => {
+                                                                                                                                                                                                                                                                                                            if (entry.isIntersecting) {
+                                                                                                                                                                                                                                                                                                                    entry.target.classList.add('visible');
+                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                              });
+                                                                                                                                                                                                                                                                                                                                }, observerOptions);
 
-  // ===== Mobile menu toggle =====
-  const mobileToggle = document.getElementById('mobileToggle');
-  const navLinks = document.getElementById('navLinks');
-  let menuOpen = false;
+                                                                                                                                                                                                                                                                                                                                  document.querySelectorAll('.product-card, .pricing-card, .layer, .about-card, .help-card').forEach(el => {
+                                                                                                                                                                                                                                                                                                                                      observer.observe(el);
+                                                                                                                                                                                                                                                                                                                                        });
 
-  function openMenu() {
-    if (!navLinks || !mobileToggle) return;
-    menuOpen = true;
-    navLinks.classList.add('active');
-    mobileToggle.classList.add('active');
-    mobileToggle.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden'; // Prevent background scroll
-  }
+                                                                                                                                                                                                                                                                                                                                          // ===== Smooth Scroll =====
+                                                                                                                                                                                                                                                                                                                                            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                                                                                                                                                                                                                                                                                                                                                anchor.addEventListener('click', function(e) {
+                                                                                                                                                                                                                                                                                                                                                      const href = this.getAttribute('href');
+                                                                                                                                                                                                                                                                                                                                                            if (href === '#') return;
+                                                                                                                                                                                                                                                                                                                                                                  const target = document.querySelector(href);
+                                                                                                                                                                                                                                                                                                                                                                        if (target) {
+                                                                                                                                                                                                                                                                                                                                                                                e.preventDefault();
+                                                                                                                                                                                                                                                                                                                                                                                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                                                                                                                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                                                                                                                                                  });
+                                                                                                                                                                                                                                                                                                                                                                                                    });
 
-  function closeMenu() {
-    if (!navLinks || !mobileToggle) return;
-    menuOpen = false;
-    navLinks.classList.remove('active');
-    mobileToggle.classList.remove('active');
-    mobileToggle.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = ''; // Restore scroll
-  }
+                                                                                                                                                                                                                                                                                                                                                                                                      // ===== Active Nav Link =====
+                                                                                                                                                                                                                                                                                                                                                                                                        const sections = document.querySelectorAll('section[id]');
+                                                                                                                                                                                                                                                                                                                                                                                                          const navLinkEls = document.querySelectorAll('.nav-link[href^="#"]');
 
-  if (mobileToggle && navLinks) {
-    mobileToggle.addEventListener('click', () => {
-      if (menuOpen) {
-        closeMenu();
-      } else {
-        openMenu();
-      }
-    });
+                                                                                                                                                                                                                                                                                                                                                                                                            window.addEventListener('scroll', () => {
+                                                                                                                                                                                                                                                                                                                                                                                                                let current = '';
+                                                                                                                                                                                                                                                                                                                                                                                                                    sections.forEach(section => {
+                                                                                                                                                                                                                                                                                                                                                                                                                          const sectionTop = section.offsetTop - 150;
+                                                                                                                                                                                                                                                                                                                                                                                                                                if (window.scrollY >= sectionTop) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                        current = section.getAttribute('id');
+                                                                                                                                                                                                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                      navLinkEls.forEach(link => {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
 
-    // Close menu when clicking a link
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        closeMenu();
-      });
-    });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    // ===== Parallax Orbs (Mouse) =====
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                      const orbs = document.querySelectorAll('.orb');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        let mouseX = 0, mouseY = 0;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                          let orbX = 0, orbY = 0;
 
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (menuOpen && !navLinks.contains(e.target) && !mobileToggle.contains(e.target)) {
-        closeMenu();
-      }
-    });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            document.addEventListener('mousemove', (e) => {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      });
 
-    // Close menu with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && menuOpen) {
-        closeMenu();
-      }
-    });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        function animateOrbs() {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            orbX += (mouseX - orbX) * 0.02;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                orbY += (mouseY - orbY) * 0.02;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    orbs.forEach((orb, i) => {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          const speed = (i + 1) * 15;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                orb.style.transform = `translate(${orbX * speed}px, ${orbY * speed}px) scale(${1 + Math.abs(orbX) * 0.05})`;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        requestAnimationFrame(animateOrbs);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            if (orbs.length > 0) animateOrbs();
 
-    // Close menu on resize to desktop
-    window.addEventListener('resize', () => {
-      if (window.innerWidth > 768 && menuOpen) {
-        closeMenu();
-      }
-    });
-  }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              // ===== Animated Pricing Bars =====
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                const pricingBars = document.querySelectorAll('.mini-bar div');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  const pricingObserver = new IntersectionObserver((entries) => {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      entries.forEach(entry => {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            if (entry.isIntersecting) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    const bar = entry.target;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            const width = bar.style.width;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    bar.style.width = '0';
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            setTimeout(() => { bar.style.width = width; }, 200);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }, { threshold: 0.5 });
 
-  // ===== Feature tabs =====
-  const featureTabs = document.querySelectorAll('.feature-tab');
-  const featureContents = document.querySelectorAll('.feature-content');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          pricingBars.forEach(bar => pricingObserver.observe(bar));
 
-  featureTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const targetId = tab.dataset.tab;
-      featureTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      featureContents.forEach(content => {
-        content.classList.remove('active');
-        if (content.id === targetId) {
-          content.classList.add('active');
-        }
-      });
-    });
-  });
-
-  // ===== Smooth scroll for anchor links =====
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-      const href = this.getAttribute('href');
-      if (href === '#') {
-        e.preventDefault();
-        return;
-      }
-      e.preventDefault();
-      const target = document.querySelector(href);
-      if (target) {
-        const navHeight = navbar ? navbar.offsetHeight : 0;
-        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 20;
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
-      }
-    });
-  });
-
-  // ===== Scroll Animations =====
-  let scrollObserver = null;
-
-  function setupScrollAnimations() {
-    // Disconnect existing observer if any
-    if (scrollObserver) {
-      scrollObserver.disconnect();
-    }
-
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px 0px -50px 0px',
-      threshold: 0.05
-    };
-
-    scrollObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          // Optionally unobserve after animation
-          // scrollObserver.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-
-    const animatedElements = document.querySelectorAll(
-      '.product-card, .pricing-card, .layer, .about-card, .help-card, .memory-layer-card'
-    );
-
-    animatedElements.forEach(el => {
-      el.classList.remove('visible');
-      scrollObserver.observe(el);
-    });
-  }
-
-  setupScrollAnimations();
-
-  // ===== Consciousness bars animation =====
-  const animateBars = () => {
-    document.querySelectorAll('.mini-bar div').forEach((bar, index) => {
-      const targetWidth = bar.style.width;
-      bar.style.width = '0';
-      // Force reflow
-      void bar.offsetWidth;
-      setTimeout(() => {
-        bar.style.width = targetWidth;
-      }, 100 + (index * 150));
-    });
-  };
-
-  const pricingSection = document.getElementById('pricing');
-  if (pricingSection) {
-    const pricingObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateBars();
-          pricingObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.2 });
-    pricingObserver.observe(pricingSection);
-  }
-
-  // ===== Parallax effect for orbs =====
-  const orbs = document.querySelectorAll('.orb');
-  let ticking = false;
-  let isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-
-  // Disable parallax on touch devices for better performance
-  if (!isTouchDevice && orbs.length > 0) {
-    window.addEventListener('mousemove', (e) => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          const x = e.clientX / window.innerWidth;
-          const y = e.clientY / window.innerHeight;
-          orbs.forEach((orb, index) => {
-            const speed = (index + 1) * 15;
-            const xOffset = (x - 0.5) * speed;
-            const yOffset = (y - 0.5) * speed;
-            orb.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
-          });
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
-  }
-
-  // ===== Loading state for buttons =====
-  document.querySelectorAll('.btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      const href = this.getAttribute('href');
-      if (href === '#') {
-        e.preventDefault();
-        const originalHTML = this.innerHTML;
-        this.innerHTML = '<span>' + (currentLang === 'ar' ? 'قريباً...' : 'Coming soon...') + '</span>';
-        this.style.opacity = '0.7';
-        this.style.pointerEvents = 'none';
-        setTimeout(() => {
-          this.innerHTML = originalHTML;
-          this.style.opacity = '1';
-          this.style.pointerEvents = 'auto';
-        }, 1500);
-      }
-    });
-  });
-
-  // ===== Active nav link based on scroll =====
-  const sections = document.querySelectorAll('section[id]');
-  const navLinkElements = document.querySelectorAll('.nav-link[href^="#"]');
-
-  if (sections.length > 0 && navLinkElements.length > 0) {
-    const sectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          navLinkElements.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === '#' + entry.target.id) {
-              link.classList.add('active');
-            }
-          });
-        }
-      });
-    }, { threshold: 0.2, rootMargin: '-80px 0px -50% 0px' });
-
-    sections.forEach(section => {
-      sectionObserver.observe(section);
-    });
-  }
-
-  // ===== Touch swipe support for feature tabs =====
-  const featuresShowcase = document.querySelector('.features-showcase');
-  if (featuresShowcase) {
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    featuresShowcase.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    featuresShowcase.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    }, { passive: true });
-
-    function handleSwipe() {
-      const swipeThreshold = 50;
-      const diff = touchStartX - touchEndX;
-      const activeTab = document.querySelector('.feature-tab.active');
-      if (!activeTab) return;
-
-      const tabs = Array.from(featureTabs);
-      const currentIndex = tabs.indexOf(activeTab);
-
-      if (Math.abs(diff) > swipeThreshold) {
-        if (diff > 0 && currentIndex < tabs.length - 1) {
-          // Swipe left -> next tab
-          tabs[currentIndex + 1].click();
-        } else if (diff < 0 && currentIndex > 0) {
-          // Swipe right -> previous tab
-          tabs[currentIndex - 1].click();
-        }
-      }
-    }
-  }
-
-  // ===== Apply initial language =====
-  applyLanguage(currentLang);
-
-  // ===== Preload critical images =====
-  const criticalImages = [
-    'assets/soulsync-logo.png',
-    'assets/mytwin-logo.png'
-  ];
-  criticalImages.forEach(src => {
-    const img = new Image();
-    img.src = src;
-  });
-
-  console.log('✨ Soul Sync website loaded — Language:', currentLang);
-});
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          })();
